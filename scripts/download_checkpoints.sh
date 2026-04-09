@@ -26,9 +26,8 @@ echo "=== Step 3: Download V-JEPA 2.1 weights into $WEIGHTS_DIR ==="
 mkdir -p "$WEIGHTS_DIR"
 export TORCH_HOME="$WEIGHTS_DIR"
 
+cd "$VJEPA2_DIR"
 python - <<EOF
-import sys
-sys.path.insert(0, "$VJEPA2_DIR")
 import torch
 
 # V-JEPA 2.1 ViT-L/384 (300M distilled) — fastest, use for first tests

@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-from src.model.loader import load_encoder_from_hub
+from vjepa21_lib.model.loader import load_encoder_from_hub
 encoder = load_encoder_from_hub("vit_giant").to(device)
 
 # %% Encoder-distance scorer (fast — no predictor needed)
-from src.surprise.scorer import EncoderDistanceScorer
+from vjepa21_lib.surprise.scorer import EncoderDistanceScorer
 
 scorer = EncoderDistanceScorer(encoder, fps=4, device=device)
 
@@ -34,7 +34,7 @@ raw_scores = scorer.score_video(
 print(f"Computed {len(raw_scores)} window scores")
 
 # %% Select and visualize
-from src.surprise.summarizer import select_by_peaks, merge_windows, plot_surprise_signal
+from vjepa21_lib.surprise.summarizer import select_by_peaks, merge_windows, plot_surprise_signal
 
 selected = select_by_peaks(raw_scores, smoothing_window=5, min_distance_windows=4)
 segments = merge_windows(selected)
@@ -47,8 +47,8 @@ plot_surprise_signal(raw_scores, selected=selected, segments=segments,
                      title=f"Surprise Signal — Ego4D")
 
 # %% Show top-5 most surprising clips (PCA visualization)
-from src.visualization.pca_features import compute_video_pca, visualize_pca_grid
-from src.data.ego4d import Ego4DSlidingWindow
+from vjepa21_lib.visualization.pca_features import compute_video_pca, visualize_pca_grid
+from vjepa21_lib.data.ego4d import Ego4DSlidingWindow
 
 top5 = sorted(raw_scores, key=lambda s: s.score, reverse=True)[:5]
 dataset = Ego4DSlidingWindow([VIDEO_PATH], context_frames=16, future_frames=1,

@@ -16,9 +16,9 @@ from pathlib import Path
 
 import torch
 
-from src.model.loader import load_encoder_from_hub
-from src.data.ego4d import Ego4DSlidingWindow
-from src.visualization.pca_features import compute_video_pca, visualize_pca_grid
+from vjepa21_lib.model.loader import load_encoder_from_hub
+from vjepa21_lib.data.ego4d import Ego4DSlidingWindow
+from vjepa21_lib.visualization.pca_features import compute_video_pca, visualize_pca_grid
 
 
 def parse_args():
@@ -48,14 +48,14 @@ def main():
     # Load model
     print(f"Loading {args.model} ...")
     if args.checkpoint:
-        from src.model.loader import load_from_checkpoint
+        from vjepa21_lib.model.loader import load_from_checkpoint
         encoder, _, _ = load_from_checkpoint(args.checkpoint, args.model)
     else:
         encoder = load_encoder_from_hub(args.model)
     encoder = encoder.to(args.device)
 
     # Load a clip
-    from src.data.ego4d import Ego4DSlidingWindow
+    from vjepa21_lib.data.ego4d import Ego4DSlidingWindow
     dataset = Ego4DSlidingWindow(
         video_paths=[args.video_path],
         context_frames=args.num_frames,

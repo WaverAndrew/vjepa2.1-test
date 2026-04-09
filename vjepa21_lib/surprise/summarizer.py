@@ -24,7 +24,7 @@ from typing import List, Optional, Tuple
 import numpy as np
 from scipy.signal import find_peaks, savgol_filter
 
-from src.surprise.scorer import SurpriseScore
+from vjepa21_lib.surprise.scorer import SurpriseScore
 
 
 # ---------------------------------------------------------------------------

@@ -32,9 +32,9 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from src.model.loader import load_encoder_from_hub
-from src.data.ego4d import Ego4DSTADataset
-from src.probing.attentive_probe import ActionAnticipationProbe, FocalLoss
+from vjepa21_lib.model.loader import load_encoder_from_hub
+from vjepa21_lib.data.ego4d import Ego4DSTADataset
+from vjepa21_lib.probing.attentive_probe import ActionAnticipationProbe, FocalLoss
 
 
 # V-JEPA 2.1 encoder output dims

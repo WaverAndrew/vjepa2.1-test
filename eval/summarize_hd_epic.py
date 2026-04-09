@@ -32,10 +32,10 @@ import torch
 import pandas as pd
 from tqdm import tqdm
 
-from src.model.loader import load_encoder_from_hub, load_from_checkpoint
-from src.data.hd_epic import list_videos
-from src.surprise.scorer import EncoderDistanceScorer, PredictionErrorScorer
-from src.surprise.summarizer import (
+from vjepa21_lib.model.loader import load_encoder_from_hub, load_from_checkpoint
+from vjepa21_lib.data.hd_epic import list_videos
+from vjepa21_lib.surprise.scorer import EncoderDistanceScorer, PredictionErrorScorer
+from vjepa21_lib.surprise.summarizer import (
     VideoSummarizer, select_by_peaks, merge_windows, plot_surprise_signal,
 )
 
@@ -117,7 +117,7 @@ def main():
             )
 
             if args.plot_signals and result["raw_scores"]:
-                from src.surprise.scorer import SurpriseScore
+                from vjepa21_lib.surprise.scorer import SurpriseScore
                 raw = [SurpriseScore(
                     video_path=str(vp),
                     start_frame=w["start_frame"],

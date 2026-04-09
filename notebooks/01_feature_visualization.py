@@ -21,13 +21,13 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device}")
 
 # %% Load encoder via torch.hub
-from src.model.loader import load_encoder_from_hub
+from vjepa21_lib.model.loader import load_encoder_from_hub
 encoder = load_encoder_from_hub("vit_giant")  # change to vit_large for faster iteration
 encoder = encoder.to(device)
 print(f"Encoder loaded. Parameters: {sum(p.numel() for p in encoder.parameters()) / 1e6:.0f}M")
 
 # %% Load a sample Ego4D clip
-from src.data.ego4d import Ego4DSlidingWindow
+from vjepa21_lib.data.ego4d import Ego4DSlidingWindow
 
 VIDEO_PATH = "/data/ego4d/videos/your_video.mp4"  # <-- change this
 dataset = Ego4DSlidingWindow(
@@ -44,7 +44,7 @@ frames = batch["context"]  # (32, 3, 384, 384)
 print(f"Loaded clip: {frames.shape}, start_frame={batch['start_frame']}")
 
 # %% Compute PCA features
-from src.visualization.pca_features import compute_video_pca, visualize_pca_grid
+from vjepa21_lib.visualization.pca_features import compute_video_pca, visualize_pca_grid
 
 pca_maps, pca = compute_video_pca(encoder, frames, device=device)
 print(f"PCA maps shape: {pca_maps.shape}")  # (T/2, H_p, W_p, 3)

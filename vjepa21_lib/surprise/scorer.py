@@ -181,7 +181,7 @@ class PredictionErrorScorer:
 
         Returns list of SurpriseScore objects, one per window position.
         """
-        from src.data.ego4d import Ego4DSlidingWindow
+        from vjepa21_lib.data.ego4d import Ego4DSlidingWindow
         from torch.utils.data import DataLoader
 
         dataset = Ego4DSlidingWindow(
@@ -239,7 +239,7 @@ class EncoderDistanceScorer:
         fps: int = 4,
         crop_size: int = 384,
     ) -> List[SurpriseScore]:
-        from src.data.ego4d import Ego4DSlidingWindow
+        from vjepa21_lib.data.ego4d import Ego4DSlidingWindow
         from torch.utils.data import DataLoader
 
         # Use 2x clips: context = clip_t, "future" = clip_{t+stride}

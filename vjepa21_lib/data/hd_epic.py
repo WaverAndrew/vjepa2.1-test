@@ -19,7 +19,7 @@ from typing import List, Optional
 import torch
 from torch.utils.data import Dataset
 
-from src.data.ego4d import make_video_transform
+from vjepa21_lib.data.ego4d import make_video_transform
 
 HD_EPIC_ROOT = "/scratch/HD-EPIC"
 
@@ -71,7 +71,7 @@ class HDEpicSlidingWindow(Dataset):
         crop_size: int = 384,
         max_videos: Optional[int] = None,
     ):
-        from src.data.ego4d import Ego4DSlidingWindow
+        from vjepa21_lib.data.ego4d import Ego4DSlidingWindow
 
         video_paths = list_videos(root, participants)
         if max_videos:
