@@ -1,34 +1,76 @@
 """
-Load V-JEPA 2.1 encoder and predictor from a checkpoint.
+Load V-JEPA 2.1 encoder from the locally cloned vjepa2 repo.
 
-The official checkpoints are loaded via torch.hub from facebookresearch/vjepa2.
-We expose the encoder (frozen) and the predictor (needed for surprise scoring).
+V-JEPA 2.1 hub model names (source: hubconf.py):
+    vjepa2_1_vit_base_384    -- ViT-B  (80M,  distilled)
+    vjepa2_1_vit_large_384   -- ViT-L  (300M, distilled) ← fast tests
+    vjepa2_1_vit_giant_384   -- ViT-g  (1B)              ← main experiments
+    vjepa2_1_vit_gigantic_384-- ViT-G  (2B)              ← best quality
 
-Usage:
-    encoder, predictor, target_encoder = load_vjepa21(cfg)
+NOTE: these are V-JEPA 2.1 names. V-JEPA 2 names (vjepa2_vit_*) are different
+      and load different checkpoints — do not mix them up.
+
+Requires the repo to be cloned first:
+    bash scripts/download_checkpoints.sh
 """
 
+import os
+import sys
 import torch
 import torch.nn as nn
 from pathlib import Path
 
+# Set by download_checkpoints.sh; override with env vars if needed
+VJEPA2_DIR = os.environ.get("VJEPA2_DIR", "/scratch/3206024/vjepa2_official")
+WEIGHTS_DIR = os.environ.get("WEIGHTS_DIR", "/home/3206024/vjepa2.1-test/weights")
 
-def load_encoder_from_hub(model_name: str = "vit_giant", pretrained: bool = True):
+# Valid V-JEPA 2.1 model names → encoder embedding dim
+MODEL_DIMS = {
+    "vjepa2_1_vit_base_384":     768,
+    "vjepa2_1_vit_large_384":   1024,
+    "vjepa2_1_vit_giant_384":   1408,
+    "vjepa2_1_vit_gigantic_384": 1664,
+}
+
+
+def load_encoder_from_hub(
+    model_name: str = "vjepa2_1_vit_giant_384",
+    pretrained: bool = True,
+) -> nn.Module:
     """
-    Load V-JEPA 2.1 encoder via torch.hub.
+    Load a V-JEPA 2.1 encoder from the locally cloned repo.
 
-    model_name options (from facebookresearch/vjepa2):
-        'vit_large'  -- ViT-L (300M, distilled from ViT-G)
-        'vit_huge'   -- ViT-H (600M)
-        'vit_giant'  -- ViT-g (1B)
-        'vit_bigG'   -- ViT-G (2B) -- V-JEPA 2.1 flagship
+    Args:
+        model_name: one of the vjepa2_1_* names listed in MODEL_DIMS above
+        pretrained: download and load pretrained weights
 
-    Returns the encoder in eval mode with frozen parameters.
+    Returns:
+        encoder in eval mode with all parameters frozen
     """
+    if model_name not in MODEL_DIMS:
+        raise ValueError(
+            f"Unknown model '{model_name}'. "
+            f"Valid V-JEPA 2.1 names: {list(MODEL_DIMS)}"
+        )
+
+    repo = VJEPA2_DIR
+    if not Path(repo).exists():
+        raise FileNotFoundError(
+            f"vjepa2 repo not found at {repo}.\n"
+            "Run:  bash scripts/download_checkpoints.sh\n"
+            "or set VJEPA2_DIR env var to your clone path."
+        )
+
+    if repo not in sys.path:
+        sys.path.insert(0, repo)
+
+    os.environ["TORCH_HOME"] = WEIGHTS_DIR
+
     encoder = torch.hub.load(
-        "facebookresearch/vjepa2",
+        repo,
         model_name,
         pretrained=pretrained,
+        source="local",
         trust_repo=True,
     )
     encoder.eval()
@@ -37,68 +79,7 @@ def load_encoder_from_hub(model_name: str = "vit_giant", pretrained: bool = True
     return encoder
 
 
-def load_from_checkpoint(checkpoint_path: str, model_name: str = "vit_giant"):
-    """
-    Load encoder + predictor from a local .pt checkpoint file.
-
-    The checkpoint is expected to contain keys:
-        'encoder'   -- state dict for the encoder (context / EMA)
-        'predictor' -- state dict for the predictor
-
-    Adjust key names if your checkpoint differs.
-    """
-    from vjepa2.src.models.vision_transformer import vit_giant, vit_large, vit_huge
-    from vjepa2.src.models.predictor import VisionTransformerPredictor
-
-    _builders = {
-        "vit_large": vit_large,
-        "vit_huge": vit_huge,
-        "vit_giant": vit_giant,
-    }
-    assert model_name in _builders, f"Unknown model: {model_name}"
-
-    ckpt = torch.load(checkpoint_path, map_location="cpu")
-
-    encoder = _builders[model_name]()
-    _load_state(encoder, ckpt, key="encoder")
-    encoder.eval()
-    for p in encoder.parameters():
-        p.requires_grad_(False)
-
-    # Target encoder (EMA copy) — same architecture
-    target_encoder = _builders[model_name]()
-    _load_state(target_encoder, ckpt, key="target_encoder")
-    target_encoder.eval()
-    for p in target_encoder.parameters():
-        p.requires_grad_(False)
-
-    # Predictor
-    predictor = None
-    if "predictor" in ckpt:
-        predictor = VisionTransformerPredictor(
-            num_patches=None,  # will be set dynamically
-            embed_dim=1024,    # ViT-g encoder output dim
-            predictor_embed_dim=384,
-            depth=24,
-            num_heads=16,
-        )
-        _load_state(predictor, ckpt, key="predictor")
-        predictor.eval()
-        for p in predictor.parameters():
-            p.requires_grad_(False)
-
-    return encoder, predictor, target_encoder
-
-
-def _load_state(model: nn.Module, ckpt: dict, key: str):
-    """Load a sub-state-dict from a checkpoint, handling 'module.' prefixes."""
-    if key not in ckpt:
-        raise KeyError(f"Key '{key}' not found in checkpoint. Available: {list(ckpt.keys())}")
-    state = ckpt[key]
-    # Strip DDP 'module.' prefix if present
-    state = {k.replace("module.", ""): v for k, v in state.items()}
-    missing, unexpected = model.load_state_dict(state, strict=False)
-    if missing:
-        print(f"[loader] {key} missing keys: {missing[:5]}{'...' if len(missing) > 5 else ''}")
-    if unexpected:
-        print(f"[loader] {key} unexpected keys: {unexpected[:5]}{'...' if len(unexpected) > 5 else ''}")
+def get_encoder_dim(model_name: str) -> int:
+    if model_name not in MODEL_DIMS:
+        raise ValueError(f"Unknown model '{model_name}'. Valid: {list(MODEL_DIMS)}")
+    return MODEL_DIMS[model_name]

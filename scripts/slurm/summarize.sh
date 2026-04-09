@@ -17,15 +17,16 @@ module load miniconda3
 source $(conda info --base)/etc/profile.d/conda.sh
 conda activate venv
 
-export TORCH_HOME=/scratch/3206024/torch_hub_cache
-mkdir -p "$TORCH_HOME"
+export VJEPA2_DIR=/scratch/3206024/vjepa2_official
+export WEIGHTS_DIR=/home/3206024/vjepa2.1-test/weights
+export TORCH_HOME="$WEIGHTS_DIR"
 
 cd /home/3206024/vjepa2.1-test
 
 python eval/summarize_hd_epic.py \
     --hd_epic_root /scratch/HD-EPIC \
     --participants P01 \
-    --model vit_giant \
+    --model vjepa2_1_vit_giant_384 \
     --scorer encoder_distance \
     --method peaks \
     --output_dir outputs/summaries \

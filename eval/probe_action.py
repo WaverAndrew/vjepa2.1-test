@@ -37,12 +37,12 @@ from src.data.ego4d import Ego4DSTADataset
 from src.probing.attentive_probe import ActionAnticipationProbe, FocalLoss
 
 
-# Encoder output dims by model size
+# V-JEPA 2.1 encoder output dims
 ENCODER_DIMS = {
-    "vit_large": 1024,
-    "vit_huge": 1280,
-    "vit_giant": 1408,
-    "vit_bigG": 1664,
+    "vjepa2_1_vit_base_384":      768,
+    "vjepa2_1_vit_large_384":    1024,
+    "vjepa2_1_vit_giant_384":    1408,
+    "vjepa2_1_vit_gigantic_384": 1664,
 }
 
 
@@ -50,7 +50,8 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--mode", choices=["train", "eval"], default="train")
     p.add_argument("--ego4d_root", type=str, required=True)
-    p.add_argument("--model", type=str, default="vit_giant")
+    p.add_argument("--model", type=str, default="vjepa2_1_vit_giant_384",
+                   choices=list(ENCODER_DIMS))
     p.add_argument("--checkpoint", type=str, default=None)
     p.add_argument("--probe_checkpoint", type=str, default=None)
     p.add_argument("--output_dir", type=str, default="outputs/probes/action")

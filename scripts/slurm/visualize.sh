@@ -18,8 +18,9 @@ source $(conda info --base)/etc/profile.d/conda.sh
 conda activate venv
 
 # Cache checkpoints on scratch so compute nodes don't re-download
-export TORCH_HOME=/scratch/3206024/torch_hub_cache
-mkdir -p "$TORCH_HOME"
+export VJEPA2_DIR=/scratch/3206024/vjepa2_official
+export WEIGHTS_DIR=/home/3206024/vjepa2.1-test/weights
+export TORCH_HOME="$WEIGHTS_DIR"
 
 cd /home/3206024/vjepa2.1-test
 
@@ -29,7 +30,7 @@ OUTPUT_DIR="outputs/visualizations"
 
 python eval/visualize_features.py \
     --video_path "$VIDEO_PATH" \
-    --model vit_giant \
+    --model vjepa2_1_vit_giant_384 \
     --output_dir "$OUTPUT_DIR" \
     --num_frames 32 \
     --fps 4 \

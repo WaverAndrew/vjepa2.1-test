@@ -24,8 +24,9 @@ from src.visualization.pca_features import compute_video_pca, visualize_pca_grid
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--video_path", type=str, required=True)
-    p.add_argument("--model", type=str, default="vit_giant",
-                   choices=["vit_large", "vit_huge", "vit_giant", "vit_bigG"])
+    p.add_argument("--model", type=str, default="vjepa2_1_vit_giant_384",
+                   choices=["vjepa2_1_vit_base_384", "vjepa2_1_vit_large_384",
+                            "vjepa2_1_vit_giant_384", "vjepa2_1_vit_gigantic_384"])
     p.add_argument("--checkpoint", type=str, default=None,
                    help="Local checkpoint path (optional; uses torch.hub if not set)")
     p.add_argument("--output_dir", type=str, default="outputs/visualizations")

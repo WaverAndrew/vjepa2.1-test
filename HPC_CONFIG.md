@@ -59,11 +59,14 @@ Video naming convention: `P{participant}-{YYYYMMDD}-{HHMMSS}.mp4`
 Pre-download on login node (needs internet), compute nodes may be firewalled:
 
 ```bash
-export TORCH_HOME=/scratch/3206024/torch_hub_cache
+# Clone repo + install + download weights — run once
 bash scripts/download_checkpoints.sh /scratch/3206024/torch_hub_cache
 ```
 
-Then add to all SLURM scripts:
+This clones the official repo to `/scratch/3206024/vjepa2_official` and installs it.
+
+Add these two exports to all SLURM scripts (already done):
 ```bash
 export TORCH_HOME=/scratch/3206024/torch_hub_cache
+export VJEPA2_DIR=/scratch/3206024/vjepa2_official
 ```
