@@ -1,32 +1,39 @@
 #!/bin/bash
 #SBATCH --job-name=vjepa21_vis
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --gres=gpu:1
+#SBATCH --account=3206024
+#SBATCH --partition=gpunew
+#SBATCH --gres=gpu:H100:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=32G
+#SBATCH --mem=64G
 #SBATCH --time=01:00:00
 #SBATCH --output=logs/vis_%j.out
 #SBATCH --error=logs/vis_%j.err
-# Adjust partition to your HPC cluster (e.g., --partition=gpu)
 
 set -e
 mkdir -p logs
 
-# Load modules (edit to match your HPC)
-module load python/3.10 cuda/12.1 gcc/11.3
-conda activate vjepa21
+module load cuda/12.1
+module load miniconda3
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate venv
 
-# --- Edit these paths ---
-VIDEO_PATH="/data/ego4d/videos/sample.mp4"
+# Cache checkpoints on scratch so compute nodes don't re-download
+export TORCH_HOME=/scratch/3206024/torch_hub_cache
+mkdir -p "$TORCH_HOME"
+
+cd /home/3206024/vjepa2.1-test
+
+# Pick one video from P01 for the sanity check
+VIDEO_PATH="/scratch/HD-EPIC/Videos/P01/P01-20240202-161948.mp4"
 OUTPUT_DIR="outputs/visualizations"
-MODEL="vit_giant"   # vit_large / vit_huge / vit_giant
 
 python eval/visualize_features.py \
     --video_path "$VIDEO_PATH" \
-    --model "$MODEL" \
+    --model vit_giant \
     --output_dir "$OUTPUT_DIR" \
     --num_frames 32 \
     --fps 4 \
     --crop_size 384 \
     --device cuda
+
+echo "Done. Check $OUTPUT_DIR for the PCA feature map PNG."
