@@ -18,8 +18,8 @@ else
 fi
 
 echo ""
-echo "=== Step 2: Install vjepa2 package into current env ==="
-pip install -e "$VJEPA2_DIR" --quiet
+echo "=== Step 2: Add vjepa2 to PYTHONPATH (no install needed) ==="
+export PYTHONPATH="$VJEPA2_DIR:${PYTHONPATH}"
 
 echo ""
 echo "=== Step 3: Download V-JEPA 2.1 weights into $WEIGHTS_DIR ==="

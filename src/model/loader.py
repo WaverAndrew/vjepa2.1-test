@@ -61,6 +61,7 @@ def load_encoder_from_hub(
             "or set VJEPA2_DIR env var to your clone path."
         )
 
+    # Add repo root to path so 'src.hub' is importable (no pip install needed)
     if repo not in sys.path:
         sys.path.insert(0, repo)
 
