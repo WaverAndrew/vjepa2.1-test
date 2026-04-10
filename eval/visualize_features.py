@@ -11,6 +11,10 @@ Usage:
         --crop_size 384
 """
 
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+import setup_paths  # noqa: E402 — sets up all import paths
+
 import argparse
 from pathlib import Path
 
