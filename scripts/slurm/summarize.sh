@@ -19,8 +19,7 @@ conda activate venv
 
 export VJEPA2_DIR=/scratch/3206024/vjepa2_official
 export WEIGHTS_DIR=/home/3206024/vjepa2.1-test/weights
-export TORCH_HOME="$WEIGHTS_DIR"
-export PYTHONPATH="$VJEPA2_DIR:${PYTHONPATH}"
+export PYTHONPATH="/home/3206024/vjepa2.1-test:$VJEPA2_DIR:${PYTHONPATH}"
 
 cd /home/3206024/vjepa2.1-test
 
